@@ -1,0 +1,68 @@
+Install Required Libraries:
+pip install speechrecognition pyttsx3 pywhatkit
+
+
+Implementation:
+
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+from datetime import datetime
+
+# Initialize the recognizer and text-to-speech engine
+recognizer = sr.Recognizer()
+tts_engine = pyttsx3.init()
+
+def speak(text):
+    """Function to make the assistant speak."""
+    tts_engine.say(text)
+    tts_engine.runAndWait()
+
+def listen():
+    """Function to listen to voice commands and return recognized text."""
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+        try:
+            command = recognizer.recognize_google(audio)
+            print(f"You said: {command}")
+            return command.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I did not understand that.")
+        except sr.RequestError:
+            speak("Sorry, there seems to be an issue with the service.")
+        return ""
+
+def process_command(command):
+    """Function to process the recognized command and respond accordingly."""
+    if "hello" in command:
+        speak("Hello! How can I help you?")
+    elif "your name" in command:
+        speak("I am your voice assistant.")
+    elif "time" in command:
+        now = datetime.now().strftime("%H:%M")
+        speak(f"The time is {now}.")
+    elif "date" in command:
+        today = datetime.now().strftime("%B %d, %Y")
+        speak(f"Today's date is {today}.")
+    elif "search for" in command:
+        search_query = command.replace("search for", "").strip()
+        speak(f"Searching the web for {search_query}")
+        pywhatkit.search(search_query)
+    elif "exit" in command or "quit" in command:
+        speak("Goodbye!")
+        exit()
+    else:
+        speak("I didn't catch that. Can you please repeat?")
+
+def main():
+    """Main function to run the voice assistant."""
+    speak("How can I assist you?")
+    while True:
+        command = listen()
+        if command:
+            process_command(command)
+
+if __name__ == "__main__":
+    main()
+
